@@ -37,12 +37,46 @@ var movement = [
     [1, 0, 0, 1]  
 ];
 
+// Add a variable to track if the game has started
+let gameStarted = false;
+
+
+
 function initializeGame() {
-    selected_background = "mario";
+    // Select a random background on startup
+    var backgrounds = ["mario", "kitty"];
+    selected_background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+
     for (var i = 0; i < ids.length - 1; i++) {
         document.getElementById(ids[i]).className = "tile " + selected_background;
     }
+    // Remove the hover effect initially
+    const tiles = document.querySelectorAll('.tile');
+    tiles.forEach(tile => tile.classList.remove('active'));
+
+    // Set the selected background in the dropdown
+    document.getElementById("backgroundSelector").value = selected_background;
 }
+
+// Function to change the background based on selection
+function changeBackground() {
+    selected_background = document.getElementById("backgroundSelector").value;
+
+    // Update the tiles with the selected background without starting the game
+    updateBackground();
+}
+
+// Create a new function to update the background without starting the game
+function updateBackground() {
+    for (var i = 0; i < ids.length - 1; i++) {
+        document.getElementById(ids[i]).className = "tile " + selected_background;
+    }
+
+    // Remove the hover effect
+    const tiles = document.querySelectorAll('.tile');
+    tiles.forEach(tile => tile.classList.remove('active'));
+}
+
 
 function shuffleBoard() {
     shuffled = ids.slice();
@@ -79,18 +113,34 @@ function shuffleBoard() {
     }
 
     displayBoard();
+    // add hover effect after shuffling
+    document.querySelectorAll('.tile').forEach(tile => tile.classList.add('active'));
+    gameStarted = true; 
 }
 
 function displayBoard() {
-    document.getElementById("main").innerHTML = ""; 
+    const mainElement = document.getElementById("main");
+    mainElement.style.transition = "transform 0.5s ease";
+    mainElement.innerHTML = ""; 
+    const tilesHTML = [];
     for (var i = 0; i < shuffled.length; i++) {
+        var tileHTML;
         if (shuffled[i] == "") {
-            document.getElementById("main").innerHTML += '<div id="sixteen" class="tile"></div>';
+            tileHTML = '<div id="sixteen" class="tile"></div>';
         } else {
             var id_name = shuffled[i];
-            document.getElementById("main").innerHTML += '<div id="' + shuffled[i] + '" class="tile' + " " + selected_background + '">' + ids_numeric[id_name] + '</div>';
+            tileHTML = '<div id="' + shuffled[i] + '" class="tile' + " " + selected_background + '">' + ids_numeric[id_name] + '</div>';
         }
+        tilesHTML.push(tileHTML);
     }
+
+    // Update the board with tiles HTML
+    mainElement.innerHTML = tilesHTML.join("");
+
+    // Reapply hover effect class to numbered tiles
+    const numberedTiles = document.querySelectorAll('.tile:not(#sixteen)');
+    numberedTiles.forEach(tile => tile.classList.add('active'));
+
     for (var j = 0; j < 4; j++) {
         var clickable_id;
 
@@ -103,9 +153,10 @@ function displayBoard() {
 }
 
 function swapPieces(clickable_id, empty_id) {
-    var temp = shuffled[empty_id];
-    shuffled[empty_id] = shuffled[clickable_id];
-    shuffled[clickable_id] = temp;
+    var temp = shuffled[empty_id]; // put empty into temp
+    // look up shuffled
+    shuffled[empty_id] = shuffled[clickable_id]; // put tile into empty
+    shuffled[clickable_id] = temp; // put empty in original tile position
 
     moves++;
 
