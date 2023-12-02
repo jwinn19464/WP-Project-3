@@ -71,11 +71,30 @@ a {
 }
 
 .mario { background: url("mario.jpg"); }
-/* Additional background options */
 .kitty { background: url("kitty.jpg"); }
-/* .background3 { background: url("background3.jpg"); } */
-/* Add more background classes for other images */
+.flower { background: url("flower.jpg"); }
+.tswift { background: url("tswift.jpg"); }
 
+/* Define the styles for movable squares */
+.clickable {
+    border-color: black;
+}
+
+/* Additional styles for the hover effect */
+.clickable:hover {
+    border-color: red;
+    text-decoration: underline;
+    color: #006600;
+}
+
+/* body{
+    text-align: center;
+} */
+
+/* #timer, #time {
+    color: black;
+    font-weight: bold;
+  } */
 
 #one      { background-position: 0      0;      }
 #two      { background-position: -100px 0;      }

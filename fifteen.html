@@ -34,17 +34,29 @@
             <div id="fifteen" class="tile">15</div>
             <div id="sixteen" class="tile"></div>
         </div>
+        <!-- Add elements for displaying game stats -->
+        <div id="timer">Timer: <span id="time">0</span></div>
+        <p>Moves: <span id="moves">0</span></p>
+
+        <!-- Add an audio element for the music -->
+        <audio id="backgroundMusic" src="faceoff.wav" preload="auto"></audio>
 
         <select id="backgroundSelector" onchange="changeBackground()">
             <option value="mario">Mario</option>
             <option value="kitty">Kitty</option>
-            <!-- <option value="background3">Background 3</option> -->
-            <!-- Add more options for other backgrounds -->
+            <option value="flower">Flower</option>
+            <option value="tswift">Taylor Swift</option>
           </select>
           
+          <!-- <select id="WebBackgroundSelector" onchange="changeWebBackground()">
+            <option value="cosmos">Cosmos</option>
+            <option value="cherry">Cherry Blossom</option>
+            <option value="chill">Chill</option>
+            <option value="star">Stars</option>
+        </select> -->
+        
 
         <button onclick="shuffleBoard()">Shuffle</button>
-
         <p>
             American puzzle author and mathematician Sam Loyd is often falsely credited with creating the puzzle; indeed,
             Loyd claimed from 1891 until his death in 1911 that he invented it. The puzzle was actually created around 1874

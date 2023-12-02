@@ -17,6 +17,8 @@ var ids_numeric = {
 };
 
 var selected_background;
+var shuffleMoves = [];
+
 
 var movement = [
     [0, 1, 1, 0],  
@@ -44,7 +46,7 @@ let gameStarted = false;
 
 function initializeGame() {
     // Select a random background on startup
-    var backgrounds = ["mario", "kitty"];
+    var backgrounds = ["mario", "kitty", "flower", "tswift"];
     selected_background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
 
     for (var i = 0; i < ids.length - 1; i++) {
@@ -77,10 +79,17 @@ function updateBackground() {
     tiles.forEach(tile => tile.classList.remove('active'));
 }
 
-
 function shuffleBoard() {
     shuffled = ids.slice();
     var sixteen = 15;
+
+    // Load the audio element
+    const audio = document.getElementById('backgroundMusic');
+    audio.load();
+
+    // Reset moves count and display
+    moves = 0;
+    document.getElementById('moves').innerText = moves;
 
     for (var i = 0; i < 500; i++) {
         var movement_id = Math.floor((Math.random() * 4));
@@ -110,19 +119,29 @@ function shuffleBoard() {
         shuffled[move_to] = temp;
 
         sixteen = move_to;
+
+        audio.play();
+        document.querySelectorAll('.tile').forEach(tile => tile.classList.add('active'));
+
+        gameStarted = true;
     }
 
     displayBoard();
-    // add hover effect after shuffling
-    document.querySelectorAll('.tile').forEach(tile => tile.classList.add('active'));
-    gameStarted = true; 
+    stopTimer(); // Reset the timer
+    seconds = 0; // Reset the seconds count to zero
+    const timerDisplay = document.getElementById('timer');
+    timerDisplay.textContent = formatTime(seconds);
+    startTimer(); // Start the timer
+    gameStarted = true;
 }
+
 
 function displayBoard() {
     const mainElement = document.getElementById("main");
     mainElement.style.transition = "transform 0.5s ease";
     mainElement.innerHTML = ""; 
     const tilesHTML = [];
+
     for (var i = 0; i < shuffled.length; i++) {
         var tileHTML;
         if (shuffled[i] == "") {
@@ -141,24 +160,94 @@ function displayBoard() {
     const numberedTiles = document.querySelectorAll('.tile:not(#sixteen)');
     numberedTiles.forEach(tile => tile.classList.add('active'));
 
-    for (var j = 0; j < 4; j++) {
-        var clickable_id;
+    const emptyIndex = shuffled.indexOf("");
 
-        if (movement[shuffled.indexOf("")][j] == 1) {
-            clickable_id = shuffled.indexOf("") + (j === 2 ? 4 : (j === 3 ? -1 : (j === 0 ? -4 : 1)));
-            document.getElementById(shuffled[clickable_id]).className += " clickable";
-            document.getElementById(shuffled[clickable_id]).setAttribute("onclick", "swapPieces(" + clickable_id + ", " + shuffled.indexOf("") + ")");
+    for (var i = 0; i < shuffled.length; i++) {
+        if (i !== emptyIndex) {
+            const rowDiff = Math.floor(emptyIndex / 4) - Math.floor(i / 4);
+            const colDiff = (emptyIndex % 4) - (i % 4);
+
+            if (rowDiff === 0 || colDiff === 0) {
+                document.getElementById(shuffled[i]).classList.add('clickable');
+                document.getElementById(shuffled[i]).setAttribute("onclick", "swapPieces(" + i + ", " + emptyIndex + ")");
+            }
         }
     }
 }
+// function changeWebsiteBackground() {
+//     const selectedBackground = document.getElementById("WebBackgroundSelector").value;
+//     document.body.style.backgroundImage = `url('path/to/${selectedBackground}.gif')`;
+// }
+
+function formatTime(seconds) {
+    const mm = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const ss = (seconds % 60).toString().padStart(2, '0');
+    return `${mm}:${ss}`;
+  }
+  
+  function stopTimer() {
+    clearInterval(timerInterval);
+  }
 
 function swapPieces(clickable_id, empty_id) {
-    var temp = shuffled[empty_id]; // put empty into temp
-    // look up shuffled
-    shuffled[empty_id] = shuffled[clickable_id]; // put tile into empty
-    shuffled[clickable_id] = temp; // put empty in original tile position
+    const emptyIndex = shuffled.indexOf("");
+    const emptyRow = Math.floor(emptyIndex / 4);
+    const emptyCol = emptyIndex % 4;
+    const clickedRow = Math.floor(clickable_id / 4);
+    const clickedCol = clickable_id % 4;
 
-    moves++;
+    if (emptyRow === clickedRow || emptyCol === clickedCol) {
+        let currentIndex = emptyIndex;
+        while (currentIndex !== clickable_id) {
+            let moveIndex;
+            if (emptyRow === clickedRow) {
+                if (emptyCol < clickedCol) {
+                    moveIndex = currentIndex + 1;
+                } else {
+                    moveIndex = currentIndex - 1;
+                }
+            } else if (emptyCol === clickedCol) {
+                if (emptyRow < clickedRow) {
+                    moveIndex = currentIndex + 4;
+                } else {
+                    moveIndex = currentIndex - 4;
+                }
+            }
+
+            const temp = shuffled[currentIndex];
+            shuffled[currentIndex] = shuffled[moveIndex];
+            shuffled[moveIndex] = temp;
+
+            currentIndex = moveIndex;
+            emptyIndex = currentIndex;
+            emptyRow = Math.floor(emptyIndex / 4);
+            emptyCol = emptyIndex % 4;
+
+            moves++;
+        }
+    }
 
     displayBoard();
 }
+
+
+
+function isPuzzleSolved() {
+    for (let i = 0; i < shuffled.length - 1; i++) {
+        if (shuffled[i] !== ids[i]) {
+            return false;
+        }
+    }
+
+    // Game is solved
+    stopTimer(); // Stop the timer when the game is complete
+    endGameNotification(); // Function to handle end-of-game notification
+    return true;
+}
+
+function endGameNotification() {
+    // Display an image or modify the appearance of the page to notify the end of the game
+    // For example, change the background color to indicate success
+    document.body.style.backgroundColor = 'lightgreen';
+}
+
